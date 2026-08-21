@@ -83,6 +83,26 @@
 .city-opt.sel{background:linear-gradient(135deg,#FFF6C0,#EAF7EF);border-color:#E6D688}
 .modal-f{padding:10px 16px;display:flex;gap:8px;border-top:1px solid var(--line)}.btn{flex:1;padding:10px;border-radius:11px;border:1px solid var(--line);background:#fff;font-weight:700;cursor:pointer;font-family:inherit;font-size:13px}.btn.pr{background:var(--green);color:#fff}
 .loader{padding:30px;text-align:center;color:var(--muted)}
+
+/* --- NEW FEATURES 2,3,6 --- */
+.count.forbidden{background:linear-gradient(135deg,#7A1D1D,#B91C1C);border-color:#FECACA;animation:pulseWarn 1.2s infinite}
+@keyframes pulseWarn{0%{box-shadow:0 0 0 0 rgba(239,68,68,.6)}70%{box-shadow:0 0 0 12px rgba(239,68,68,0)}100%{box-shadow:0 0 0 0 rgba(239,68,68,0)}}
+.count.forbidden .ico{background:linear-gradient(135deg,#FECACA,#FFF);color:#7A1D1D}
+.bell-btn{width:36px;height:36px;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.1);color:#fff;cursor:pointer;display:grid;place-items:center;font-size:16px}
+.bell-btn.on{background:var(--gold);color:var(--green);border-color:var(--gold)}
+.chart-wrap{padding:12px;background:#FFFEF6;border-top:1px dashed var(--line)}
+.chart-title{font-family:"Anek Bangla";font-size:13px;margin:0 0 10px;display:flex;justify-content:space-between;align-items:center}
+.bars{display:flex;gap:8px;align-items:end;height:90px}
+.bar{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px}
+.bar-track{width:100%;background:#FEF3C7;border-radius:10px 10px 4px 4px;position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:end;min-height:20px}
+.bar-fill{background:linear-gradient(180deg,#0E3B2E,#1B4A3A);border-radius:10px 10px 4px 4px;transition:height .6s;width:100%;display:grid;place-items:center;color:#FFF6C8;font-size:10px;font-weight:700}
+.bar-fill.low{background:linear-gradient(180deg,#D4A017,#FFF1A0);color:#0E3B2E}
+.bar label{font-size:11px;font-weight:700;color:var(--green)}
+.bar small{font-size:9px;color:var(--muted)}
+.notif-toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);background:var(--green);color:#fff;padding:12px 18px;border-radius:999px;box-shadow:0 12px 30px rgba(0,0,0,.2);z-index:100;display:none;align-items:center;gap:10px;font-size:13px}
+.notif-toast.show{display:flex;animation:slideDown .3s}
+@keyframes slideDown{from{transform:translate(-50%,-20px);opacity:0}to{transform:translate(-50%,0);opacity:1}}
+
 </style>
 </head>
 <body>
@@ -107,6 +127,7 @@
 <div class="card tracker">
 <div class="card-h"><h3>সম্পূর্ণ মাসের নামাজের ট্র্যাকার</h3><div class="tracker-head"><span class="badge" id="trackerMonth">—</span><span class="badge" style="background:#ECFDF5;flex:0 0 auto;white-space:nowrap" id="trackerCount">0/0</span></div></div>
 <div class="summary" id="summaryBox"></div>
+<div class="chart-wrap"><div class="chart-title"><span>📊 এই মাসের অগ্রগতি চার্ট</span><small style="font-size:10px;color:#9B9B93" id="chartSub">৫ ওয়াক্ত ভিত্তিক</small></div><div class="bars" id="chartBars"></div></div>
 <div class="track-top">
 <div class="chip active" data-f="all">সব ওয়াক্ত</div><div class="chip" data-f="fajr">🌙 ফজর</div><div class="chip" data-f="dhuhr">☀️ যুহর</div><div class="chip" data-f="asr">🌤️ আসর</div><div class="chip" data-f="maghrib">🌇 মাগরিব</div><div class="chip" data-f="isha">🌌 ইশা</div>
 </div>
@@ -116,15 +137,58 @@
 
 <div class="count"><div class="ico" id="countIcon">🕌</div><div style="flex:1"><div style="font-size:9px;opacity:.7;text-transform:uppercase" id="countLabel">পরবর্তী নামাজ</div><div style="font-weight:700;font-family:Anek Bangla" id="countPray">যুহর</div><div style="font-size:10px;opacity:.7" id="countCity">ঢাকা</div></div><div class="ct"><div><b id="h">00</b><span style="font-size:10px"> ঘ</span></div><div><b id="m">00</b><span style="font-size:10px"> মি</span></div><div><b id="s">00</b><span style="font-size:10px"> সে</span></div></div></div>
 
-<div class="modal-bg" id="cityModalBg"><div class="modal"><div class="modal-h"><h3>স্থান শনাক্ত করুন</h3><p>নামাজের সময় এবং চাঁদের তারিখ দেখাতে আপনার অবস্থান জানা জরুরি।</p></div><div class="auto"><div>📡 <b>অটোমেটিক স্থান শনাক্ত করুন</b></div><button id="autoDetect">শনাক্ত করুন</button></div><div class="search-w"><div class="s-ic"><span>🔍</span><input id="citySearch" class="search" placeholder="শহর নির্বাচন করুন - যেমন ঢাকা"></div></div><div class="city-list" id="cityList"></div><div class="modal-f"><button class="btn" id="cancelCity">বাতিল</button><button class="btn pr" id="saveCity">সংরক্ষণ</button></div></div></div>
+<div class="modal-bg" id="cityModalBg"><div class="modal"><div class="modal-h"><h3>স্থান শনাক্ত করুন</h3><p>নামাজের সময় এবং চাঁদের তারিখ দেখাতে আপনার অবস্থান জানা জরুরি।</p></div><!-- অটোমেটিক শনাক্তকরণ বাদ দেওয়া হয়েছে --><div class="search-w"><div class="s-ic"><span>🔍</span><input id="citySearch" class="search" placeholder="শহর নির্বাচন করুন - যেমন ঢাকা"></div></div><div class="city-list" id="cityList"></div><div class="modal-f"><button class="btn" id="cancelCity">বাতিল</button><button class="btn pr" id="saveCity">সংরক্ষণ</button></div></div></div>
 
+<div class="notif-toast" id="notifToast"><span>🔔</span><span id="toastMsg">আজান</span></div>
 <script>
 const CITIES_URL="https://cdn.jsdelivr.net/gh/srizwan198704-dev/PrayertimePedia/BangladeshCities.json";
 const CITY_BASE="https://cdn.jsdelivr.net/gh/srizwan198704-dev/PrayertimePedia@main/BD/";
 let allCities=[],selectedCity=JSON.parse(localStorage.getItem('prayer_city')||'null')||{name_en:"Dhaka",name_bn:"ঢাকা"},tempSelected=selectedCity,allMonth=[],todayData=null,filter='all';
 const $=s=>document.querySelector(s);
 const toBn=n=>String(n).replace(/\d/g,d=>"০১২৩৪৫৬৭৮৯"[d]);
-function parseM(t){if(!t)return null;const[h,m]=t.split(':').map(Number);return h*60+m;}
+function parseM(t, k){
+  if(!t) return null;
+  let [h,m]=t.split(':').map(Number);
+  if(isNaN(h)||isNaN(m)) return null;
+  // ডাটা 12-hour ফরম্যাটে থাকে যেমন আসর 04:35 মানে 16:35
+  // তাই নামাজ অনুযায়ী ঠিক করি
+  if(k){
+    if(k==='asr' || k==='maghrib' || k==='isha'){
+      if(h<12) h+=12; // 4 => 16
+    } else if(k==='dhuhr'){
+      // যুহরের শুরু 12টার আশেপাশে, শেষ বিকালে
+      // শেষ সময় যদি 1-11 হয় তাহলে PM ধরবো
+      // এটা end এর জন্য আলাদা হ্যান্ডেল করবো নিচে
+    } else if(k==='fajr'){
+      // ফজর 0-7
+      if(h>=12) h-=12; // যদি ভুলে 16 আসে
+    }
+  }
+  return h*60+m;
+}
+function parseMEnd(t, k, startM){
+  if(!t) return null;
+  let [h,m]=t.split(':').map(Number);
+  if(isNaN(h)||isNaN(m)) return null;
+  if(k==='dhuhr' || k==='asr' || k==='maghrib'){
+    if(h<12) h+=12;
+  } else if(k==='isha'){
+    if(h<12) h+=12;
+    // ইশা রাত 11টা পর্যন্ত হতে পারে
+  } else if(k==='fajr'){
+    // ফজর শেষ সকাল
+  }
+  let endM=h*60+m;
+  // যদি end <= start হয়, তাহলে পরের দিন নয়, বরং PM ধরে নেওয়া হয়েছে কিনা চেক
+  if(startM!=null && endM<=startM){
+    // যেমন যুহর 12:03 শুরু, শেষ 04:38 মানে 16:38, আগেই +12 করেছি তাই 12:03<16:38 হবে
+    // যদি এখনো <= হয়, 12 ঘন্টা যোগ করো
+    if(endM < startM) endM+=12*60;
+  }
+  return endM;
+}
+function parseMGeneric(t){ if(!t) return null; const [h,m]=t.split(':').map(s=>parseInt(s)); if(isNaN(h)) return null; return h*60+m; }
+
 async function loadCities(){try{const r=await fetch(CITIES_URL,{cache:'no-store'});allCities=await r.json();}catch{allCities=[{name_en:"Dhaka",name_bn:"ঢাকা",division:"Dhaka"}];}renderCityList(allCities);}
 function renderCityList(list){const box=$("#cityList");box.innerHTML=list.map(c=>`<div class="city-opt ${tempSelected.name_en===c.name_en?'sel':''}" data-en="${c.name_en}"><span><b>${c.name_bn}</b> <small style="color:#9CA3AF"> ${c.division||''}</small></span><span>${c.name_en===selectedCity.name_en?'✓':''}</span></div>`).join('');box.querySelectorAll('.city-opt').forEach(el=>{el.onclick=()=>{tempSelected=allCities.find(x=>x.name_en===el.dataset.en);renderCityList(filtered());}});}
 function filtered(){const q=$("#citySearch").value.trim();if(!q)return allCities;return allCities.filter(c=>c.name_bn.includes(q)||c.name_en.toLowerCase().includes(q.toLowerCase()));}
@@ -164,11 +228,7 @@ $("#hijriBn").textContent=todayData.date?.hijri?.bn||todayData.date?.full?.bn?.s
 $("#bengaliBn").textContent=todayData.date?.bengali?.bn||todayData.date?.full?.bn?.split('•')[1]||'';
 $("#todayBadge").textContent=todayData.meta?.location?.city_bn||selectedCity.name_bn;
 $("#trackerMonth").textContent=(todayData.date?.full?.bn||'');
-const order=[{k:'fajr',ic:'🌙',bn:'ফজর'},{k:'dhuhr',ic:'☀️',bn:'যুহর'},{k:'asr',ic:'🌤️',bn:'আসর'},{k:'maghrib',ic:'🌇',bn:'মাগরিব'},{k:'isha',ic:'🌌',bn:'ইশা'}];
-const now=new Date();const nowM=now.getHours()*60+now.getMinutes();
-let active=null,next=null,activeIdx=-1;
-order.forEach((o,i)=>{const s=parseM(todayData.prayer_times?.[o.k]?.start);const e=parseM(todayData.prayer_times?.[o.k]?.end);if(s!=null&&nowM>=s&&nowM<e){active=o.k;activeIdx=i;}});
-if(active===null){for(let i=0;i<order.length;i++){const s=parseM(todayData.prayer_times?.[order[i].k]?.start);if(s!=null&&s>nowM){next=order[i];break;}}if(!next)next=order[0];}else{next=order[activeIdx+1]||order[0];}
+const {active, next, order} = getNextPrayerInfo();
 $("#prayerList").innerHTML=order.map(o=>{
 const pt=todayData.prayer_times?.[o.k];if(!pt)return'';
 const isA=active===o.k;const isN=next?.k===o.k&&!isA;
@@ -177,7 +237,7 @@ return `<div class="p-item ${isA?'active':''} ${isN?'next':''}"><div class="p-ic
 $("#forbiddenList").innerHTML=['sunrise','noon','sunset'].map(k=>{const d=todayData.forbidden_times?.[k];if(!d)return'';return `<div class="mini"><span>🚫 ${d.label_bn}</span><b>${d.time_bn}</b></div>`;}).join('');
 const n=todayData.nafl_times||{};
 $("#naflList").innerHTML=`<div class="nafl"><b>তাহাজ্জুদ</b><div class="t">${n.tahajjud?.time_bn||'-'}</div></div><div class="nafl"><b>সাহরী শেষ</b><div class="t">${n.tahajjud?.time_bn||todayData.prayer_times?.fajr?.time_bn?.split(' - ')[0]||'-'}</div></div><div class="nafl"><b>ইশরাক</b><div class="t">${n.ishraq?.time_bn||'-'}</div></div><div class="nafl"><b>চাশত</b><div class="t">${n.chasht?.time_bn||'-'}</div></div>`;
-renderDays();startCountdown(next,active);
+renderDays();startCountdown();
 }
 function renderDays(){
 const store=JSON.parse(localStorage.getItem('salat_tracker_v2')||'{}');
@@ -211,21 +271,134 @@ $("#summaryBox").innerHTML=`
 grid.querySelectorAll('.pill').forEach(el=>{el.onclick=()=>{const k=el.dataset.k;const s=JSON.parse(localStorage.getItem('salat_tracker_v2')||'{}');if(s[k]) delete s[k]; else s[k]=true;localStorage.setItem('salat_tracker_v2',JSON.stringify(s));renderDays();}});
 }
 let timer=null;
-function startCountdown(next,active){
-clearInterval(timer);
-function tick(){
-const now=new Date();if(!todayData||!next)return;
-let tStr=active?todayData.prayer_times?.[active]?.end:todayData.prayer_times?.[next.k]?.start;if(!tStr)return;
-const [th,tm]=tStr.split(':').map(Number);let target=new Date();target.setHours(th,tm,0,0);
-if(target<now&&!active){target.setDate(target.getDate()+1);}
-let diff=Math.max(0,Math.floor((target-now)/1000));
-const h=Math.floor(diff/3600),m=Math.floor((diff%3600)/60),s=diff%60;
-$("#h").textContent=toBn(String(h).padStart(2,'0'));$("#m").textContent=toBn(String(m).padStart(2,'0'));$("#s").textContent=toBn(String(s).padStart(2,'0'));
-if(active){$("#countLabel").textContent=`${todayData.prayer_times[active]?.label_bn||''} শেষ হতে`;$("#countPray").textContent=todayData.prayer_times[active]?.label_bn||'';$("#countIcon").textContent='⏳';}
-else{$("#countLabel").textContent='পরবর্তী নামাজ';$("#countPray").textContent=todayData.prayer_times?.[next.k]?.label_bn||next.k;$("#countIcon").textContent=next.k==='fajr'?'🌙':next.k==='dhuhr'?'☀️':next.k==='asr'?'🌤️':next.k==='maghrib'?'🌇':'🌌';}
-$("#countCity").textContent=`${todayData.meta?.location?.city_bn||selectedCity.name_bn} • ${active?'চলছে':'বাকি'}`;
+function getNextPrayerInfo(){
+  const now=new Date();
+  const nowM=now.getHours()*60+now.getMinutes();
+  const order=[
+    {k:'fajr',ic:'🌙'},
+    {k:'dhuhr',ic:'☀️'},
+    {k:'asr',ic:'🌤️'},
+    {k:'maghrib',ic:'🌇'},
+    {k:'isha',ic:'🌌'}
+  ];
+  let active=null, activeIdx=-1;
+  for(let i=0;i<order.length;i++){
+    const k=order[i].k;
+    const s=parseM(todayData.prayer_times?.[k]?.start, k);
+    let e=parseM(todayData.prayer_times?.[k]?.end, k);
+    // end এর জন্য বিশেষ হ্যান্ডলিং
+    e=parseMEnd(todayData.prayer_times?.[k]?.end, k, s);
+    if(s!=null && e!=null && nowM>=s && nowM<e){ active=k; activeIdx=i; break; }
+    // যদি end <= start হয়ে যায় (যেমন ইশা রাত পেরিয়ে ফজর পর্যন্ত) তাহলে midnight cross
+    if(s!=null && e!=null && e<=s && (nowM>=s || nowM<e)){ active=k; activeIdx=i; break; }
+  }
+  let next=null, isTomorrow=false;
+  if(active!==null){
+    next=order[activeIdx+1] || order[0];
+    if(activeIdx+1>=order.length) isTomorrow=true;
+  } else {
+    for(let i=0;i<order.length;i++){
+      const k=order[i].k;
+      const s=parseM(todayData.prayer_times?.[k]?.start, k);
+      if(s!=null && s>nowM){ next=order[i]; break; }
+    }
+    if(!next){ next=order[0]; isTomorrow=true; }
+  }
+  return {active, activeIdx, next, isTomorrow, order};
 }
-tick();timer=setInterval(tick,1000);
+
+function startCountdown(){
+  clearInterval(timer);
+  function tick(){
+    if(!todayData) return;
+    const now=new Date();
+    const {active, next, isTomorrow, order}=getNextPrayerInfo();
+    let tStr, target, k;
+    if(active){
+      k=active;
+      tStr=todayData.prayer_times?.[k]?.end;
+    } else {
+      k=next.k;
+      tStr=todayData.prayer_times?.[k]?.start;
+    }
+    if(!tStr) return;
+    let [th,tm]=tStr.split(':').map(Number);
+    // PM correction for countdown target
+    if(k==='asr' || k==='maghrib' || k==='isha'){ if(th<12) th+=12; }
+    else if(k==='dhuhr' && !active){ /* start is 12 */ }
+    else if(k==='dhuhr' && active){ if(th<12) th+=12; } // end
+    target=new Date();
+    target.setHours(th,tm,0,0);
+    if(isTomorrow && !active){
+      const tomorrowIdx=new Date().getDate();
+      let tomorrowFajr=null;
+      if(allMonth[tomorrowIdx]?.prayer_times?.fajr?.start){
+        tomorrowFajr=allMonth[tomorrowIdx].prayer_times.fajr.start;
+      }
+      if(tomorrowFajr){
+        let [fh,fm]=tomorrowFajr.split(':').map(Number);
+        target=new Date(); target.setDate(target.getDate()+1); target.setHours(fh,fm,0,0);
+      } else {
+        target.setDate(target.getDate()+1);
+      }
+    } else if(target<now && !active && !isTomorrow){
+      // যদি আজকের পরবর্তী নামাজের সময় পেরিয়ে যায় (যেমন হিসাব ভুলে), কালকের ফজর দেখাও
+      if(next.k!=='fajr' || target.getHours()<12){
+         // keep today target, but if still past, go tomorrow
+         if(target<now) target.setDate(target.getDate()+1);
+      }
+    }
+
+    let diff=Math.max(0,Math.floor((target-now)/1000));
+    const h=Math.floor(diff/3600), m=Math.floor((diff%3600)/60), s=diff%60;
+    $("#h").textContent=toBn(String(h).padStart(2,'0'));
+    $("#m").textContent=toBn(String(m).padStart(2,'0'));
+    $("#s").textContent=toBn(String(s).padStart(2,'0'));
+
+    if(active){
+      $("#countLabel").textContent=`${todayData.prayer_times[active]?.label_bn||''} শেষ হতে`;
+      $("#countPray").textContent=todayData.prayer_times[active]?.label_bn||'';
+      $("#countIcon").textContent='⏳';
+      $("#countCity").textContent=`${todayData.meta?.location?.city_bn||selectedCity.name_bn} • চলছে`;
+    } else {
+      $("#countLabel").textContent='পরবর্তী নামাজ';
+      $("#countPray").textContent=todayData.prayer_times?.[next.k]?.label_bn||next.k;
+      $("#countIcon").textContent=next.k==='fajr'?'🌙':next.k==='dhuhr'?'☀️':next.k==='asr'?'🌤️':next.k==='maghrib'?'🌇':'🌌';
+      $("#countCity").textContent=`${todayData.meta?.location?.city_bn||selectedCity.name_bn} • ${isTomorrow?'আগামীকাল':''} বাকি`;
+    }
+
+    // যখন কাউন্টডাউন 0 হয়ে যাবে, UI রিফ্রেশ করুন যাতে active/next আপডেট হয়
+    // Feature 3: forbidden check
+    const forbiddenNow = getForbiddenNow();
+    const countEl = document.querySelector('.count');
+    if(forbiddenNow && countEl){
+      countEl.classList.add('forbidden');
+      $('#countLabel').textContent='🚫 '+ (forbiddenNow.label_bn||'নিষিদ্ধ সময়');
+      $('#countPray').textContent=forbiddenNow.label_bn||'নিষিদ্ধ';
+      $('#countIcon').textContent='⛔';
+      $('#countCity').textContent=(todayData.meta?.location?.city_bn||selectedCity.name_bn)+' • এখন নামাজ নিষিদ্ধ';
+    } else {
+      if(countEl) countEl.classList.remove('forbidden');
+    }
+    // Feature 2: notification
+    checkAzanNotification(active, next, diff);
+
+    if(diff<=0){
+      renderPrayerOnly();
+    }
+  }
+  tick();
+  timer=setInterval(tick,1000);
+}
+
+function renderPrayerOnly(){
+  if(!todayData) return;
+  const {active, next, order}=getNextPrayerInfo();
+  $("#prayerList").innerHTML=order.map(o=>{
+    const pt=todayData.prayer_times?.[o.k];if(!pt)return'';
+    const isA=active===o.k;const isN=next?.k===o.k&&!isA;
+    return `<div class="p-item ${isA?'active':''} ${isN?'next':''}"><div class="p-icon">${o.ic}</div><div class="p-info"><div class="p-name">${pt.label_bn}</div></div><div class="p-time">${pt.time_bn||''}</div></div>`;
+  }).join('');
 }
 document.querySelectorAll('.chip').forEach(c=>{c.onclick=()=>{document.querySelectorAll('.chip').forEach(x=>x.classList.remove('active'));c.classList.add('active');filter=c.dataset.f;renderDays();}});
 function openM(){$("#cityModalBg").classList.add('open');tempSelected=selectedCity;renderCityList(filtered());}
@@ -233,21 +406,155 @@ function closeM(){$("#cityModalBg").classList.remove('open');}
 $("#openCityModal").onclick=openM;$("#cancelCity").onclick=closeM;
 $("#cityModalBg").addEventListener('click',e=>{if(e.target.id==='cityModalBg')closeM();});
 $("#saveCity").onclick=async()=>{selectedCity=tempSelected;localStorage.setItem('prayer_city',JSON.stringify(selectedCity));closeM();$("#currentCityBn").textContent=selectedCity.name_bn;document.getElementById('prayerList').innerHTML='<div class="loader">লোড হচ্ছে...</div>';await loadCityData(selectedCity.name_en);};
-$("#autoDetect").onclick=()=>{
-if(!navigator.geolocation){alert('লোকেশন সাপোর্ট নেই');return;}
-$("#autoDetect").textContent='খুঁজছি...';
-navigator.geolocation.getCurrentPosition(async pos=>{
-try{
-const r=await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${pos.coords.latitude}&longitude=${pos.coords.longitude}&localityLanguage=bn`);
-const j=await r.json();const cityName=j.city||j.locality||j.principalSubdivision||'Dhaka';
-let found=allCities.find(c=>cityName.toLowerCase().includes(c.name_en.toLowerCase())||c.name_bn.includes(cityName));
-if(!found)found=allCities.find(c=>c.name_en==='Dhaka');
-tempSelected=found;$("#citySearch").value=found.name_bn;renderCityList(filtered());
-}catch(e){}
-$("#autoDetect").textContent='শনাক্ত করুন';
-},()=>{alert('অনুমতি দিন');$("#autoDetect").textContent='শনাক্ত করুন';});
-};
+// অটোমেটিক শনাক্তকরণ ফিচার বাদ দেওয়া হয়েছে
 (async()=>{await loadCities();try{await loadCityData(selectedCity.name_en);}catch{await loadCityData('Dhaka');}})();
+
+// ===== FEATURE 2: AZAN NOTIFICATION =====
+let notifEnabled = localStorage.getItem('azan_notif')==='1';
+let lastNotifiedKey = '';
+function initNotif(){
+  // bell button in count card
+  const countEl = document.querySelector('.count');
+  if(countEl && !document.getElementById('bellBtn')){
+    const bell = document.createElement('button');
+    bell.id='bellBtn';
+    bell.className='bell-btn'+(notifEnabled?' on':'');
+    bell.textContent=notifEnabled?'🔔':'🔕';
+    bell.title='আজান নোটিফিকেশন';
+    bell.onclick=async()=>{
+      if(!notifEnabled){
+        if('Notification' in window){
+          const p = await Notification.requestPermission();
+          if(p!=='granted'){ showToast('নোটিফিকেশন অনুমতি দিন'); return; }
+        }
+        notifEnabled=true;
+        localStorage.setItem('azan_notif','1');
+        bell.classList.add('on'); bell.textContent='🔔';
+        showToast('আজান নোটিফিকেশন চালু হয়েছে');
+      } else {
+        notifEnabled=false;
+        localStorage.setItem('azan_notif','0');
+        bell.classList.remove('on'); bell.textContent='🔕';
+        showToast('নোটিফিকেশন বন্ধ');
+      }
+    };
+    countEl.appendChild(bell);
+  }
+}
+function showToast(msg){
+  const t=$('#notifToast'); const m=$('#toastMsg');
+  m.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3500);
+}
+function playAzanBeep(){
+  try{
+    const ctx=new (window.AudioContext||window.webkitAudioContext)();
+    const o=ctx.createOscillator(); const g=ctx.createGain();
+    o.type='sine'; o.frequency.value=660; o.connect(g); g.connect(ctx.destination);
+    g.gain.setValueAtTime(0.001, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.4, ctx.currentTime+0.1);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+1.2);
+    o.start(); o.stop(ctx.currentTime+1.2);
+  }catch(e){}
+}
+function checkAzanNotification(active, next, diff){
+  if(!notifEnabled || !('Notification' in window)) return;
+  if(Notification.permission!=='granted') return;
+  const now=new Date();
+  const key=now.getFullYear()+'-'+now.getMonth()+'-'+now.getDate()+'-'+(active||'next-'+next.k)+'-'+Math.floor(diff/60);
+  // 5 min before
+  if(!active && diff>0 && diff<=5*60 && diff>4*60+50){
+    const k='pre-'+next.k+'-'+now.getDate();
+    if(lastNotifiedKey!==k){
+      lastNotifiedKey=k;
+      new Notification('পরবর্তী নামাজ: '+(todayData.prayer_times?.[next.k]?.label_bn||next.k), {body: `৫ মিনিট বাকি • ${todayData.meta?.location?.city_bn||''}`, icon:''});
+      playAzanBeep(); showToast(`${todayData.prayer_times?.[next.k]?.label_bn||next.k} ৫ মিনিট বাকি`);
+    }
+  }
+  // exact time
+  if(!active && diff<=2){
+    const k='exact-'+next.k+'-'+now.getDate()+'-'+now.getHours();
+    if(lastNotifiedKey!==k){
+      lastNotifiedKey=k;
+      new Notification((todayData.prayer_times?.[next.k]?.label_bn||next.k)+' এর সময় হয়েছে', {body: `${todayData.meta?.location?.city_bn||''} • এখন ${todayData.prayer_times?.[next.k]?.label_bn||''} এর ওয়াক্ত`, icon:''});
+      playAzanBeep(); showToast(`${todayData.prayer_times?.[next.k]?.label_bn||''} এর সময় হয়েছে`);
+    }
+  }
+}
+
+// ===== FEATURE 3: FORBIDDEN TIME LIVE WARNING =====
+function getForbiddenNow(){
+  if(!todayData?.forbidden_times) return null;
+  const now=new Date(); const nowM=now.getHours()*60+now.getMinutes();
+  for(const k of ['sunrise','noon','sunset']){
+    const ft=todayData.forbidden_times[k];
+    if(!ft) continue;
+    // forbidden_times may have start/end or just time range in time_bn - try parse start/end if available
+    let s=null,e=null;
+    if(ft.start && ft.end){
+      s=parseMGeneric(ft.start); e=parseMGeneric(ft.end);
+      // fix PM
+      if(s!=null && e!=null){
+        // sunrise 5:xx-6:xx, noon 11:xx-12:xx, sunset 6:xx-7:xx
+        if(k==='sunset' || k==='noon'){ if(s<12) s+=12; if(e<12) e+=12; }
+        if(s!=null && e!=null && e<=s) e+=60; // small window
+        if(nowM>=s && nowM<e) return ft;
+      }
+    } else if(ft.time_bn){
+      // try extract from "05:30 - 05:45" style
+      const parts=ft.time_bn.match(/([0-9:]+).*?([0-9:]+)/);
+      if(parts){
+        s=parseMGeneric(parts[1]); e=parseMGeneric(parts[2]);
+        // heuristic
+        if(k==='sunrise'){ /* morning */ }
+        if(k==='noon'){ if(s && s<11) s+=12; if(e && e<12) e+=12; }
+        if(k==='sunset'){ if(s && s<12) s+=12; if(e && e<12) e+=12; }
+        if(s!=null && e!=null && nowM>=s && nowM<e) return ft;
+      }
+    }
+  }
+  return null;
+}
+
+// ===== FEATURE 6: WEEKLY CHART =====
+function renderChart(){
+  const store=JSON.parse(localStorage.getItem('salat_tracker_v2')||'{}');
+  const cityPrefix=(todayData?.meta?.location?.city||selectedCity.name_en)+'-';
+  const per={fajr:0,dhuhr:0,asr:0,maghrib:0,isha:0};
+  const totalDays=allMonth.length||30;
+  Object.keys(store).forEach(k=>{
+    if(k.startsWith(cityPrefix)){
+      const wk=k.split('-').pop();
+      if(per[wk]!==undefined) per[wk]++;
+    }
+  });
+  const max=Math.max(1,...Object.values(per));
+  const labels={fajr:'ফজর',dhuhr:'যুহর',asr:'আসর',maghrib:'মাগরিব',isha:'ইশা'};
+  const icons={fajr:'🌙',dhuhr:'☀️',asr:'🌤️',maghrib:'🌇',isha:'🌌'};
+  const barsEl=$('#chartBars');
+  if(!barsEl) return;
+  barsEl.innerHTML=Object.keys(per).map(k=>{
+    const val=per[k];
+    const pct=totalDays?Math.round((val/totalDays)*100):0;
+    const h=Math.max(10, Math.round((val/max)*70));
+    const low=pct<40;
+    return `<div class="bar"><div class="bar-track" style="height:90px"><div class="bar-fill ${low?'low':''}" style="height:${h}%">${val>0?toBn(val):''}</div></div><label>${icons[k]} ${labels[k]}</label><small>${toBn(pct)}%</small></div>`;
+  }).join('');
+  const sub=$('#chartSub');
+  if(sub) sub.textContent=`${toBn(totalDays)} দিনে • ${toBn(Object.values(per).reduce((a,b)=>a+b,0))} ওয়াক্ত আদায়`;
+}
+
+// patch renderDays to also render chart
+const _origRenderDays = renderDays;
+renderDays = function(){
+  _origRenderDays();
+  try{ renderChart(); }catch(e){}
+};
+
+// patch init after load
+document.addEventListener('DOMContentLoaded', ()=>{ initNotif(); });
+
+initNotif();
 </script>
 </body>
 </html>
